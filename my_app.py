@@ -1,6 +1,8 @@
 import streamlit as st
 import pickle
 import pandas as pd
+from sklearn.compose import make_column_transformer
+from sklearn.preprocessing import OrdinalEncoder
 
 
 st.sidebar.title('Car Price Prediction')
@@ -19,8 +21,8 @@ car_model=st.sidebar.selectbox("Select model of your car", ('Audi A1', 'Audi A2'
        'Opel Insignia', 'Renault Clio', 'Renault Duster', 'Renault Espace'))
 
 
-model=pickle.load(open("rf_model_new","rb"))
-
+richard_model=pickle.load(open("rf_model_new","rb"))
+richard_transformer = pickle.load(open('transformer', 'rb'))
 
 
 my_dict = {
@@ -38,28 +40,11 @@ df = pd.DataFrame.from_dict([my_dict])
 st.header("The configuration of your car is below")
 st.table(df)
 
-columns= ['age',
- 'hp_kW',
- 'km',
- 'Gearing_Type_Automatic',
- 'Gearing_Type_Manual',
- 'Gearing_Type_Semi-automatic',
- 'make_model_Audi A1',
- 'make_model_Audi A2',
- 'make_model_Audi A3',
- 'make_model_Opel Astra',
- 'make_model_Opel Corsa',
- 'make_model_Opel Insignia',
- 'make_model_Renault Clio',
- 'make_model_Renault Duster',
- 'make_model_Renault Espace']
-
-
-df = pd.get_dummies(df).reindex(columns=columns, fill_value=0)
+df2 = richard_transformer.transform(df)
 
 st.subheader("Press predict if configuration is okay")
 
 if st.button("Predict"):
-    prediction = model.predict(df)
+    prediction = richard_model.predict(df2)
     st.success("The estimated price of your car is €{}. ".format(int(prediction[0])))
     
